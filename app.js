@@ -16,7 +16,7 @@ app.get('/', (req, res, next) => {
   })
 })
 
-// app.use('/data', dataRouter)
+app.use('/data', dataRouter)
 
 //) 404 not found
 app.all('*', (req, res, next) => {
