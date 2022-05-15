@@ -28,7 +28,8 @@ router.get('/readLinks', async (req, res, next) => {
   //1 Products Total: 11807
   //1 If every day I added 1000 products it would take 12 days to get the whole database!!!!!!!!!!!!!!!!!!!!
 
-  for (let i = 0; i < productLinks.links.length; i++) {
+  // for (let i = 0; i < productLinks.links.length; i++) {
+  for (let i = 0; i < 1; i++) {
     // for (let i = 0; i < 100; i++) {
     const productLink = productLinks.links[i]
 
