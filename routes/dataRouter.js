@@ -18,7 +18,7 @@ let browser
   console.log('Here we go scrapping')
 })()
 
-router.get('/readLinks', async (req, res, next) => {
+router.get('/readLinks/:productNumber', async (req, res, next) => {
   //) Steps:
   //1 npm start => visit "http://localhost:3000/data/readLinks"
   //1 After passing 100 products, sort by latest and compare last product to linksOriginal.json product number + 2 and its reference
@@ -28,70 +28,70 @@ router.get('/readLinks', async (req, res, next) => {
   //1 Products Total: 11807
   //1 If every day I added 1000 products it would take 12 days to get the whole database!!!!!!!!!!!!!!!!!!!!
 
+  const productNumber = req.params.productNumber
+
   // for (let i = 0; i < productLinks.links.length; i++) {
-  for (let i = 0; i < 1; i++) {
-    // for (let i = 0; i < 100; i++) {
-    const productLink = productLinks.links[i]
+  // const productLink = productLinks.links[i]
+  const productLink = productLinks.links[productNumber]
 
-    const newPage = await browser.newPage()
-    await newPage.goto(productLink, {
-      waitUntil: 'networkidle2',
-      timeout: 0,
-    })
+  const newPage = await browser.newPage()
+  await newPage.goto(productLink, {
+    waitUntil: 'networkidle2',
+    timeout: 0,
+  })
 
-    const info = await newPage.evaluate(() => {
-      return {
-        title: document.querySelector('h1[itemprop=name]')?.innerText,
-        preview: document.querySelector('#bigpic').currentSrc,
+  const info = await newPage.evaluate(() => {
+    return {
+      title: document.querySelector('h1[itemprop=name]')?.innerText,
+      preview: document.querySelector('#bigpic').currentSrc,
 
-        images: Array.from(document.querySelectorAll('a.fancybox img')).map(
-          e => e.currentSrc
-        ),
+      images: Array.from(document.querySelectorAll('a.fancybox img')).map(
+        e => e.currentSrc
+      ),
 
-        price: parseFloat(
-          document.querySelector('[itemprop="price"]').attributes.content.value
-        ),
+      price: parseFloat(
+        document.querySelector('[itemprop="price"]').attributes.content.value
+      ),
 
-        reference: document.querySelector('#product_reference span[content]')
+      reference: document.querySelector('#product_reference span[content]')
+        ? document.querySelector('#product_reference span[content]').innerText
           ? document.querySelector('#product_reference span[content]').innerText
-            ? document.querySelector('#product_reference span[content]')
-                .innerText
-            : undefined
-          : undefined,
+          : undefined
+        : undefined,
 
-        description: document.querySelector('.table-data-sheet > tbody')
-          ? Array.from(
-              document.querySelector('.table-data-sheet > tbody').rows
-            ).map(e => {
-              const vartype = Array.from(e.children)[0].outerText
-              const proper = Array.from(e.children)[1].outerText
-              const returnVal = {}
-              returnVal[vartype] = proper
-              return returnVal
-            })
-          : [],
+      description: document.querySelector('.table-data-sheet > tbody')
+        ? Array.from(
+            document.querySelector('.table-data-sheet > tbody').rows
+          ).map(e => {
+            const vartype = Array.from(e.children)[0].outerText
+            const proper = Array.from(e.children)[1].outerText
+            const returnVal = {}
+            returnVal[vartype] = proper
+            return returnVal
+          })
+        : [],
 
-        category: 'manuel',
+      category: 'manuel',
 
-        ficheTechnique: Array.from(
-          document.querySelectorAll('.page-product-box .rte ul li')
-        ).map(e => e?.innerText),
+      ficheTechnique: Array.from(
+        document.querySelectorAll('.page-product-box .rte ul li')
+      ).map(e => e?.innerText),
 
-        presentation: Array.from(
-          document.querySelectorAll('.page-product-box .rte p')
-        ).map(e => e?.innerText),
+      presentation: Array.from(
+        document.querySelectorAll('.page-product-box .rte p')
+      ).map(e => e?.innerText),
 
-        shortDescription: document.querySelector('#short_description_content')
-          ? Array.from(
-              document.querySelector('#short_description_content').children
-            ).map(e => e?.innerText)
-          : [],
-      }
-    })
+      shortDescription: document.querySelector('#short_description_content')
+        ? Array.from(
+            document.querySelector('#short_description_content').children
+          ).map(e => e?.innerText)
+        : [],
+    }
+  })
 
-    await Product.create(info)
-    await delay(3000)
-  }
+  await Product.create(info)
+  // await delay(3000)
+  // }
 
   console.log('Done')
 
